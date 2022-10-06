@@ -9,12 +9,6 @@
 #define FALSE 0
 
 //DEFINICOES DA ANALISE
-#define ERRO_UNDEF "nao declarado"
-#define WRNG_NUSED "nao usado"
-#define ERROR_2DEF "declarado mais de uma vez"
-#define ERROR_SINTATICO "Problema com analise sintatica"
-#define SINTATICAMENTE_CORRETO "O programa esta sintaticamente correto"
-#define SEMANTICAMENTE_CORRETO "O programa esta semanticamento correto"
 #define REPORT TRUE
 #define REPORT_TM TRUE
 
@@ -53,7 +47,6 @@
 #define pcreg 7
 #define MEMSTART -3
 
-int erros = 0;
 int cont_declr_var_linha = 0;
 int cont_declr_tot = 0;
 int instruction_counter = 0;
@@ -101,9 +94,6 @@ typedef struct _simbolo{
 	int usado;
 	int qtd_usado;
 	char kind[6];
-	int linha;
-	int inreg;
-	int reg;
 }Simbolo;
 
 void cria_Simbolo(char* id,char* kind);
@@ -122,7 +112,6 @@ void insereTS(Simbolo s);
 int busca_Simbolo(char *name, char *kind);
 int hoare(int s, int n);
 void order(int s, int n);
-void setreg();
 
 //REPORTS
 void report(int sint_erro);
@@ -170,10 +159,7 @@ void storeVAR(char *id)
 	{
 		Simbolo *s = (Simbolo *)vector_get(TS,posicao);
 		Instruction inst;
-		if(s->inreg)
-			inst = cria_Instruction(RM,LDA,s->reg,ac,0,FALSE);
-		else
-			inst = cria_Instruction(RM,ST,ac,gp,posicao,FALSE);
+		inst = cria_Instruction(RM,ST,ac,gp,posicao,FALSE);
 		emitInstruction(inst);
 	}
 }
@@ -204,10 +190,7 @@ void loadVAR(char* id)
 	int posicao = busca_Simbolo(id,"var");
 	Simbolo *s = (Simbolo *)vector_get(TS,posicao);
 	Instruction inst;
-	if(s->inreg)
-		inst = cria_Instruction(RM,LDA,ac,s->reg,0,FALSE);
-	else
-		inst = cria_Instruction(RM,LD,ac,gp,posicao,FALSE);
+	inst = cria_Instruction(RM,LD,ac,gp,posicao,FALSE);
 	vector_add(ExpInstruction_list,(void*)&inst,sizeof(Instruction));
 }
 
@@ -232,9 +215,6 @@ void cria_Simbolo(char * id,char *kind)
 		s.declarado = TRUE;
 		s.usado = FALSE;
 		s.qtd_usado=0;
-		s.inreg = 0;
-		s.reg = 0;
-		s.linha = yylineno;
 		insereTS(s);
 	}
 	else //Se ja existe marca que foi declarado mais de uma vez
@@ -256,7 +236,6 @@ void marcausado_Simbolo(char* id, char *kind)
 		s.declarado = FALSE;
 		s.usado = TRUE;
 		s.qtd_usado += factor;
-		s.linha = yylineno;
 		cont_declr_tot++;
 		insereTS(s);
 	}
@@ -310,19 +289,6 @@ void order(int s,int n)
 		q = hoare(s,n);
 		order(s,q);
 		order(q+1,n);
-	}
-}
-
-void setreg()
-{
-	int i;
-	for(i=0;i<3;i++)
-	{
-		Simbolo *s = (Simbolo*)vector_get(TS,TS->length-i-1);
-		if(strcmp(s->kind,"var")==0)
-		{
-			s->inreg = 1;
-		}
 	}
 }
 
@@ -619,11 +585,6 @@ call:
 int main (int argc, char *argv[]) 
 {
 	int sint_erro;
-	if(argc < 2)
-	{
-		perror("Uso: ./g-- <input_file> [<output_file>]\n");
-		return -1;
-	}
 	TS = create_vector();
 	ExpInstruction_list = create_vector();
 	Location_stack = create_vector();
@@ -689,50 +650,22 @@ int main (int argc, char *argv[])
 void report(int sint_erro)
 {
 	order(0,TS->length);
-	setreg();
 	int i = 0;
 	for(i=0;i<TS->length;i++)
 	{
 		Simbolo *s = (Simbolo*)vector_get(TS,i);
-		if(!s->declarado)
-		{
-			erros++;
-			printf("[l.%d] ERROR : %s %s\n",s->linha,s->id,ERRO_UNDEF);
-		}
-		else
-		{
-			if(s->declarado>1)
-			{
-				erros++;
-				printf("[l.%d] ERROR : %s %s\n",s->linha,s->id,ERROR_2DEF);
-			}
-			if(!s->usado && strcmp(s->id,"main"))
-			{
-				printf("[l.%d] WARNING: %s %s\n",s->linha,s->id,WRNG_NUSED);
-			}
-		}
 	}
 	
 	if(REPORT)
 	{
-		printf("----REPORT SEMANTICO----\nPrograma com %d linhas\nHouve %d declr. \nHouve %d erro(s)\n",yylineno-1,cont_declr_tot,erros);
-		printf("KIND\tTIPO\tID\tDECLARADO\tUSADO\tQTD USO\tINREG\tREG\tLINHA\n");
+		printf("----Parsing finalizado----\nDeclaração: %d\n",cont_declr_tot);
+		printf("Tipo Decl.\tType\tID\tDeclarado\tUsado\n");
 		for(i=0;i<TS->length;i++)
 		{
 			Simbolo *s = (Simbolo*)vector_get(TS,i);
-			printf("%s\t%s\t%s\t%d\t\t%d\t%d\t%d\t%d\t%d\n",s->kind,s->tipo,s->id,s->declarado,s->usado,s->qtd_usado,s->inreg,s->reg,s->linha);
-		}
-		if(!erros)
-		{
-			if(!sint_erro)
-				printf("%s\n",SINTATICAMENTE_CORRETO);
-			printf("%s\n",SEMANTICAMENTE_CORRETO);
+			printf("%s\t\t%s\t%s\t%d\t\t%d\n",s->kind,s->tipo,s->id,s->declarado,s->usado);
 		}
 	}
 }
 
-yyerror (s) /* Called by yyparse on error */
-{
-	erros++;
-	printf ("[l.%d] ERROR : %s\n",yylineno,ERROR_SINTATICO);
-}
+yyerror (s) {}
