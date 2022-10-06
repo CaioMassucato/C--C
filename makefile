@@ -3,7 +3,7 @@ all: main clean
 main:
 	bison -d -v src/c-minus-.y
 	flex src/c-minus-.l
-	gcc -g c-minus-.tab.c lex.yy.c src/vector.c src/vector.h -o g--
+	gcc -g c-minus-.tab.c lex.yy.c src/vector.c src/vector.h -o result
 
 clean:
 	rm -rf *.o
@@ -14,6 +14,6 @@ clean:
 	rm -rf ./src/*.gch
 	
 fclean: clean
-	rm -rf g--
+	rm -rf result
 	rm -rf *.out
 	rm -rf *.output
