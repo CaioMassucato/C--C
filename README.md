@@ -1,12 +1,12 @@
 ## Universidade de Brasília (UnB) - 2022/1
 ### Compiladores - Professora Germana
 
-##### Alunos
+#### Alunos
 - Bruno Barros      - 180046063
 - Caio Massucato    - 160115001
 - Caroline Ferreira - 160067766
 
-##### Projeto Final 
+#### Projeto Final 
 
 Este projeto teve como finalidade implementar analisadores léxicos, sintáticos, semânticos e geradores de código a fim de desenvolver um compilador para a linguagem C.
 
