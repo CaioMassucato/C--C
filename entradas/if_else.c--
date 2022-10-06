@@ -1,0 +1,19 @@
+/**/
+int a,b;
+main()
+{
+	read(a);
+	read(b);
+	if(a < b)
+	{
+		print(a);
+	}
+	else
+	{
+		print(b);
+	}
+	if( a == 1) then
+	{
+		print(30);
+	}
+}
