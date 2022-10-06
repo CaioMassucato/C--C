@@ -45,7 +45,6 @@
 #define gp 5
 #define mp 6
 #define pcreg 7
-#define MEMSTART -3
 
 int cont_declr_var_linha = 0;
 int cont_declr_tot = 0;
@@ -605,39 +604,32 @@ int main (int argc, char *argv[])
 	}
 	strcat(outfile_name,".tm");
 	yyin = fopen(infile_name,"r");
-	if(yyin)
+	
+	do_semantics = 1;
+	do_code = 0;
+	sint_erro = yyparse();
+	rewind(yyin);
+	do_code = 1;
+	do_semantics = 0;
+	instruction_counter = 0;
+	report(sint_erro);
+	if(TS->length!=0 && !sint_erro)
 	{
-		do_semantics = 1;
-		do_code = 0;
-		sint_erro = yyparse();
-		rewind(yyin);
-		do_code = 1;
-		do_semantics = 0;
-		instruction_counter = 0;
-		report(sint_erro);
-		if(TS->length!=0 && !sint_erro)
+		if(do_code)
 		{
-			if(do_code)
-			{
-				if(argc < 3)
-					yyout = fopen(outfile_name,"w");
-				else
-					yyout = fopen(argv[2],"w");
-				if(REPORT_TM) emitComment("PRELUDIO");
-				emitInstruction(cria_Instruction(RM,LD,6,0,0,FALSE));
-				emitInstruction(cria_Instruction(RM,ST,0,0,0,FALSE));
-				yyparse();
-				if(REPORT_TM) emitComment("STOP");
-				emitInstruction(cria_Instruction(RO,HALT,0,0,0,FALSE));
-				printf("N instrucoes : %d\n",instruction_counter);
-				fclose(yyout);
-			}
+			if(argc < 3)
+				yyout = fopen(outfile_name,"w");
+			else
+				yyout = fopen(argv[2],"w");
+			if(REPORT_TM) emitComment("PRELUDIO");
+			emitInstruction(cria_Instruction(RM,LD,6,0,0,FALSE));
+			emitInstruction(cria_Instruction(RM,ST,0,0,0,FALSE));
+			yyparse();
+			if(REPORT_TM) emitComment("STOP");
+			emitInstruction(cria_Instruction(RO,HALT,0,0,0,FALSE));
+			printf("Contagem instr: %d\n",instruction_counter);
+			fclose(yyout);
 		}
-	}
-	else
-	{
-		printf("Arquivo ""%s"" não existe\n",infile_name);
-		return -1;
 	}
 	fclose(yyin);
 	destroy_vector(TS);
