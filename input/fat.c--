@@ -1,4 +1,3 @@
-/*Codigo linguagem c-- que computa o fatorial de um numero inteiro e positivo*/
 int x,fat;
 main ()
 {
