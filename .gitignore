@@ -1,0 +1,5 @@
+*.out
+*.gch
+*.tm
+result
+*.output

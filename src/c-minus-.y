@@ -650,7 +650,7 @@ void report(int sint_erro)
 	
 	if(REPORT)
 	{
-		printf("----Parsing finalizado----\nDeclaração: %d\n",cont_declr_tot);
+		printf("----Tabela de Símbolos----\nDeclarações: %d\n",cont_declr_tot);
 		printf("Tipo Decl.\tType\tID\tDeclarado\tUsado\n");
 		for(i=0;i<TS->length;i++)
 		{

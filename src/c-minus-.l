@@ -14,7 +14,7 @@
 ("read")								{return READ;}
 ("if")									{return IF;}
 ("else")								{return ELSE;}
-("<-"|"=")								{yylval.operador = (char*) strdup(yytext);return ASSIGN;}
+("=")								    {yylval.operador = (char*) strdup(yytext);return ASSIGN;}
 ("+"|"-")								{yylval.operador = (char*) strdup(yytext);return OADD;}
 ("*"|"/")								{yylval.operador = (char*) strdup(yytext);return OMULT;}
 ("<"|">"|"=="|">="|"<="|"!="|"&&"|"||")	{yylval.operador = (char*) strdup(yytext);return REL;}
